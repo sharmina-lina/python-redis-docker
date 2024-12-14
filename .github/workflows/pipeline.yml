@@ -7,11 +7,11 @@ on:
     branches: [ "main" ]  
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: self-hosted
     
     steps:
-       # 1. Checkout the code
+    # 1. Checkout the code
     - name: Checkout repository
       uses: actions/checkout@v4
     # 2. Login to the dockerhub
@@ -41,18 +41,18 @@ jobs:
         VM_USER: ${{ secrets.VM_USER }}
       run: |
         ssh -vvv -tt -o StrictHostKeyChecking=no -i vm_key.pem $VM_USER@$VM_HOST << 'EOF'
-        # Log in to Docker Hub (on the VM)
-        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+          # Log in to Docker Hub (on the VM)
+          echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
                   
-        # Pull the latest Docker image
-        docker pull sharmina/tic-tac-toe_v1:latest
+          # Pull the latest Docker image
+          docker pull sharmina/tic-tac-toe_v1:latest
       
-        # Stop and remove any existing container
-        docker stop tic-tac-toe || true
-        docker rm tic-tac-toe || true
+          # Stop and remove any existing container
+          docker stop tic-tac-toe || true
+          docker rm tic-tac-toe || true
                   
       
-        # Run the new container
-        docker run -d -p 3000:3000 --name tic-tac-toe sharmina/tic-tac-toe_v1:latest
-        exit
-     EOF                   
+          # Run the new container
+          docker run -d -p 3000:3000 --name tic-tac-toe sharmina/tic-tac-toe_v1:latest
+          exit
+        EOF                   
