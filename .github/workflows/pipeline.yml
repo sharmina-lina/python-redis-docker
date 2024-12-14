@@ -1,0 +1,57 @@
+name: CI/CD pipeline for python App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+       # 1. Checkout the code
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    # 2. Login to the dockerhub
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME}}
+        password: ${{ secrets.DOCKER_PASSWORD}}
+    #3. Build the Docker Image
+    - name: Build Docker image
+      run: |
+        docker build -t ${{secrets.DOCKER_USERNAME}}/python-app:latest .
+    # 4. Push the Docker image to DockerHub
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/python-app.latest
+    # 5. Deploy to OpenStack
+   
+    - name: Prepare SSH key
+      run: |
+        echo "${{ secrets.VM_SSH_KEY }}" > vm_key.pem
+        chmod 600 vm_key.pem
+      
+    - name: Deploy Docker container on VM
+      env:
+        VM_HOST: ${{ secrets.VM_HOST }}
+        VM_USER: ${{ secrets.VM_USER }}
+      run: |
+        ssh -vvv -tt -o StrictHostKeyChecking=no -i vm_key.pem $VM_USER@$VM_HOST << 'EOF'
+        # Log in to Docker Hub (on the VM)
+        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                  
+        # Pull the latest Docker image
+        docker pull sharmina/tic-tac-toe_v1:latest
+      
+        # Stop and remove any existing container
+        docker stop tic-tac-toe || true
+        docker rm tic-tac-toe || true
+                  
+      
+        # Run the new container
+        docker run -d -p 3000:3000 --name tic-tac-toe sharmina/tic-tac-toe_v1:latest
+        exit
+     EOF                   
