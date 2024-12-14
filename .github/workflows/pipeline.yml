@@ -2,11 +2,12 @@ name: CI/CD pipeline for python App
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]  
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: self-hosted
     
     steps:
