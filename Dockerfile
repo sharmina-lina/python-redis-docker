@@ -11,7 +11,7 @@ RUN python3 -m venv $VIRTUAL_ENV
 #Set the working directory
 WORKDIR /app
 COPY ./app /app
-COPY ./requirements.txt .
+COPY ./app/requirements.txt .
 
 #Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
