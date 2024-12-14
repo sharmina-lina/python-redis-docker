@@ -14,7 +14,7 @@ COPY ./app /app
 COPY ./app/requirements.txt .
 
 #Install dependencies
-RUN pip install --no-cache-dir --index-url https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+RUN pip install --default-timeout=100 --no-cache-dir --index-url https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 # Expose port 5000
 EXPOSE 5000
